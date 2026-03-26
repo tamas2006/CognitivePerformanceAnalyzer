@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cognitive Performance Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- LANDING -->
+<div id="landing" class="page active">
+  <div class="landing-badge">🧠 AI-Powered Exam Analytics</div>
+  <h1>Cognitive Performance<br>Analyzer</h1>
+  <p>Track your exam readiness, identify weak areas, and visualize your cognitive progress with intelligent analytics designed for competitive exam aspirants.</p>
+  <div class="landing-btns">
+    <button class="btn btn-primary" onclick="showPage('user-auth')">Student Login / Register</button>
+    <button class="btn btn-outline" onclick="showPage('admin-auth')">Admin Login</button>
+  </div>
+</div>
+
+<!-- USER AUTH -->
+<div id="user-auth" class="page">
+  <div class="auth-wrap">
+    <div class="auth-box">
+      <div style="text-align:center;margin-bottom:1.5rem">
+        <div class="nav-brand" style="font-size:1.3rem;margin-bottom:.4rem">🧠 CPA</div>
+        <p style="color:var(--text-muted);font-size:.88rem">Cognitive Performance Analyzer</p>
+      </div>
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Login</div>
+        <div class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</div>
+      </div>
+      <div id="login-form">
+        <div class="form-group"><label>Username</label><input id="login-user" placeholder="Enter username" /></div>
+        <div class="form-group"><label>Password</label><input id="login-pass" type="password" placeholder="Enter password" /></div>
+        <button class="btn btn-primary" style="width:100%" onclick="userLogin()">Login</button>
+        <p style="text-align:center;margin-top:1rem;font-size:.82rem;color:var(--text-muted)">Demo: user1 / pass123</p>
+      </div>
+      <div id="register-form" style="display:none">
+        <div class="form-group"><label>Full Name</label><input id="reg-name" placeholder="Your full name" /></div>
+        <div class="form-group"><label>Username</label><input id="reg-user" placeholder="Choose a username" /></div>
+        <div class="form-group"><label>Password</label><input id="reg-pass" type="password" placeholder="Choose a password" /></div>
+        <button class="btn btn-primary" style="width:100%" onclick="userRegister()">Create Account</button>
+      </div>
+      <button class="btn btn-outline" style="width:100%;margin-top:.75rem" onclick="showPage('landing')">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN AUTH -->
+<div id="admin-auth" class="page">
+  <div class="auth-wrap">
+    <div class="auth-box">
+      <div style="text-align:center;margin-bottom:1.5rem">
+        <div class="nav-brand" style="font-size:1.3rem;margin-bottom:.4rem">⚙️ Admin Panel</div>
+        <p style="color:var(--text-muted);font-size:.88rem">Restricted Access</p>
+      </div>
+      <div class="form-group"><label>Admin Username</label><input id="admin-user" placeholder="admin" /></div>
+      <div class="form-group"><label>Password</label><input id="admin-pass" type="password" placeholder="Password" /></div>
+      <button class="btn btn-primary" style="width:100%" onclick="adminLogin()">Login as Admin</button>
+      <p style="text-align:center;margin-top:1rem;font-size:.82rem;color:var(--text-muted)">Demo: </p>
+      <button class="btn btn-outline" style="width:100%;margin-top:.75rem" onclick="showPage('landing')">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- USER DASHBOARD -->
+<div id="user-dashboard" class="page">
+  <nav>
+    <div class="nav-brand">🧠 CPA</div>
+    <div class="nav-user">
+      <span id="nav-username"></span>
+      <div class="avatar" id="nav-avatar">U</div>
+      <button class="btn btn-outline btn-sm" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+  <div class="layout">
+    <div class="sidebar">
+      <div class="nav-item active" onclick="switchUserSection('dashboard',this)"><span class="icon">🏠</span> Dashboard</div>
+      <div class="nav-item" onclick="switchUserSection('take-test',this)"><span class="icon">📝</span> Take Test</div>
+      <div class="nav-item" onclick="switchUserSection('my-results',this)"><span class="icon">📊</span> My Results</div>
+      <div class="nav-item" onclick="switchUserSection('analytics',this)"><span class="icon">📈</span> Analytics</div>
+      <div class="nav-item" onclick="switchUserSection('readiness',this)"><span class="icon">🎯</span> Exam Readiness</div>
+    </div>
+    <div class="main" id="user-main"></div>
+  </div>
+</div>
+
+<!-- TEST INTERFACE -->
+<div id="test-interface" class="page">
+  <nav>
+    <div class="nav-brand">🧠 Active Test</div>
+    <div class="nav-user">
+      <div class="timer" id="test-timer">30:00</div>
+    </div>
+  </nav>
+  <div class="main" style="max-width:700px;margin:0 auto">
+    <div class="test-header">
+      <div>
+        <div style="font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em" id="test-subject-label">Subject</div>
+        <div style="font-weight:600;font-size:1.05rem" id="test-title-label">Test</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:.78rem;color:var(--text-muted)">Question</div>
+        <div style="font-weight:600" id="test-q-counter">1 / 10</div>
+      </div>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="test-progress" style="width:10%"></div></div>
+    <div class="question-card">
+      <div class="q-number" id="q-num">Question 1</div>
+      <div class="q-text" id="q-text"></div>
+      <div class="options" id="q-options"></div>
+    </div>
+    <div style="display:flex;gap:1rem;margin-top:1.5rem;justify-content:space-between">
+      <button class="btn btn-outline" id="btn-prev" onclick="prevQuestion()">← Previous</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="admin-dashboard" class="page">
+  <nav>
+    <div class="nav-brand">⚙️ Admin Panel — CPA</div>
+    <div class="nav-user">
+      <span style="color:var(--text-muted);font-size:.85rem">Administrator</span>
+      <div class="avatar" style="background:linear-gradient(135deg,var(--accent2),var(--danger))">A</div>
+      <button class="btn btn-outline btn-sm" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+  <div class="layout">
+    <div class="sidebar">
+      <div class="nav-item active" onclick="switchAdminSection('overview',this)"><span class="icon">🏠</span> Overview</div>
+      <div class="sidebar-title">Manage</div>
+      <div class="nav-item" onclick="switchAdminSection('subjects',this)"><span class="icon">📚</span> Subjects</div>
+      <div class="nav-item" onclick="switchAdminSection('questions',this)"><span class="icon">❓</span> Questions</div>
+      <div class="nav-item" onclick="switchAdminSection('users',this)"><span class="icon">👥</span> Users</div>
+      <div class="sidebar-title">Reports</div>
+      <div class="nav-item" onclick="switchAdminSection('results',this)"><span class="icon">📋</span> Test Results</div>
+      <div class="nav-item" onclick="switchAdminSection('performance',this)"><span class="icon">📈</span> Performance</div>
+    </div>
+    <div class="main" id="admin-main"></div>
+  </div>
+</div>
+
+<!-- ADD SUBJECT MODAL -->
+<div class="modal-overlay" id="modal-subject">
+  <div class="modal">
+    <h3>Add New Subject</h3>
+    <div class="form-group"><label>Subject Name</label><input id="new-subject-name" placeholder="e.g. Mathematics" /></div>
+    <div class="form-group"><label>Icon (emoji)</label><input id="new-subject-icon" placeholder="📐" maxlength="2" /></div>
+    <div class="form-group"><label>Category</label>
+      <select id="new-subject-cat">
+        <option>Science</option><option>Mathematics</option><option>Language</option>
+        <option>General Knowledge</option><option>Reasoning</option>
+      </select>
+    </div>
+    <div class="flex-gap">
+      <button class="btn btn-primary" onclick="addSubject()">Add Subject</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-subject')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD QUESTION MODAL -->
+<div class="modal-overlay" id="modal-question">
+  <div class="modal">
+    <h3>Add New Question</h3>
+    <div class="form-group"><label>Subject</label>
+      <select id="q-subject-select"></select>
+    </div>
+    <div class="form-group"><label>Question Text</label><textarea id="q-text-input" placeholder="Type the question here..."></textarea></div>
+    <div class="form-group"><label>Option A</label><input id="q-opt-a" placeholder="Option A" /></div>
+    <div class="form-group"><label>Option B</label><input id="q-opt-b" placeholder="Option B" /></div>
+    <div class="form-group"><label>Option C</label><input id="q-opt-c" placeholder="Option C" /></div>
+    <div class="form-group"><label>Option D</label><input id="q-opt-d" placeholder="Option D" /></div>
+    <div class="form-group"><label>Correct Answer</label>
+      <select id="q-correct">
+        <option value="0">Option A</option><option value="1">Option B</option>
+        <option value="2">Option C</option><option value="3">Option D</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Difficulty</label>
+      <select id="q-difficulty"><option>Easy</option><option>Medium</option><option>Hard</option></select>
+    </div>
+    <div class="flex-gap">
+      <button class="btn btn-primary" onclick="addQuestion()">Add Question</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-question')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toast-icon">✅</span><span id="toast-msg"></span></div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
